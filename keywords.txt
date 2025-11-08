@@ -1,0 +1,49 @@
+#######################################
+# Syntax Coloring Map For SamsungNASA
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+SamsungNASA	KEYWORD1
+NASAPacket	KEYWORD1
+NASAAddress	KEYWORD1
+NASACommand	KEYWORD1
+NASAMessageSet	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+end	KEYWORD2
+sendPacket	KEYWORD2
+setPacketHandler	KEYWORD2
+addMessage	KEYWORD2
+encode	KEYWORD2
+decode	KEYWORD2
+getSourceAddress	KEYWORD2
+getDestinationAddress	KEYWORD2
+getDataType	KEYWORD2
+getMessageCount	KEYWORD2
+getMessage	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+AddressClass_Outdoor	LITERAL1
+AddressClass_Indoor	LITERAL1
+AddressClass_WiredRemote	LITERAL1
+AddressClass_WiFiKit	LITERAL1
+PacketType_Normal	LITERAL1
+PacketType_StandBy	LITERAL1
+DataType_Read	LITERAL1
+DataType_Write	LITERAL1
+DataType_Request	LITERAL1
+DataType_Response	LITERAL1
+DataType_Notification	LITERAL1
+MessageSetType_Enum	LITERAL1
+MessageSetType_Variable	LITERAL1
+MessageSetType_LongVariable	LITERAL1
