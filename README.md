@@ -122,6 +122,8 @@ Contributions are welcome! Please:
 
 Based on the Samsung NASA protocol reverse engineering efforts and few surfaced documents.
 
+Thanks to the contributors of [ESPHome Samsung HVAC Integration](https://github.com/omerfaruk-aran/esphome_samsung_hvac_bus) for interpreting some of the protocol addresses.
+
 ## Disclaimer
 
 This library is intended for educational use in home and educational applications and is not affiliated with or endorsed by Samsung. Use at your own risk. Always comply with local regulations regarding modifications to HVAC systems.
