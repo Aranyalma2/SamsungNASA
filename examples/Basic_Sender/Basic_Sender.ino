@@ -36,7 +36,7 @@ void setup() {
   Serial.println("====================================\n");
   
   // Initialize NASA protocol as an Outdoor device
-  if (!nasa.begin(9600, 5, 17, 4, AddressClass_Outdoor, 0x0F, 0x00)) {
+  if (!nasa.begin(9600, F1_F2, 16, 17, 4, AddressClass_Undefined, 0x0F, 0x00)) {
     Serial.println("ERROR: Failed to initialize NASA protocol!");
     while (1) {
       delay(1000);

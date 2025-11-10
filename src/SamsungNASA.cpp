@@ -14,7 +14,8 @@ SamsungNASA::~SamsungNASA() {
     end();
 }
 
-bool SamsungNASA::begin(uint32_t baudRate, 
+bool SamsungNASA::begin(uint32_t baudRate,
+                        BUS_TYPE busType,
                         int8_t rxPin, 
                         int8_t txPin, 
                         int8_t reDePin,
@@ -31,7 +32,7 @@ bool SamsungNASA::begin(uint32_t baudRate,
     }
     
     // Initialize serial
-    _serial.begin(baudRate, SERIAL_8N1, rxPin, txPin);
+    _serial.begin(baudRate, busType, rxPin, txPin);
     
     // Create mutex
     _sendMutex = xSemaphoreCreateMutex();

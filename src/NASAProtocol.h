@@ -25,6 +25,7 @@ enum AddressClass : uint8_t {
     AddressClass_PowerDivider = 0x5B,
     AddressClass_OnOffController = 0x60,
     AddressClass_WiFiKit = 0x62,
+    AddressClass_MIM = 0x63,
     AddressClass_CentralController = 0x65,
     AddressClass_DMS = 0x6A,
     AddressClass_JIGTester = 0x80,

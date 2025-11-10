@@ -117,7 +117,7 @@ void setup() {
   
   // Initialize NASA protocol
   // Parameters: baudRate, rxPin, txPin, reDePin, deviceClass, deviceChannel, deviceAddress
-  if (!nasa.begin(9600, 5, 17, 4, AddressClass_Undefined, 0x0F, 0x01)) {
+  if (!nasa.begin(9600, F1_F2, 16, 17, 4, AddressClass_Undefined, 0x0F, 0x01)) {
     Serial.println("ERROR: Failed to initialize NASA protocol!");
     while (1) {
       delay(1000);

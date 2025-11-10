@@ -11,19 +11,26 @@
 
 typedef void (*PacketHandler)(const NASAPacket& packet);
 
+enum BUS_TYPE : uint32_t {
+    F1_F2 = SERIAL_8N1,
+    R1_R2 = SERIAL_8E1
+};
+
 class SamsungNASA {
 public:
     SamsungNASA(HardwareSerial& serial = Serial2);
     ~SamsungNASA();
 
     // Initialize the library
-    bool begin(uint32_t baudRate = 9600, 
-               int8_t rxPin = 16, 
-               int8_t txPin = 17, 
-               int8_t reDePin = 4,
-               uint8_t deviceClass = AddressClass_Undefined,
-               uint8_t deviceChannel = 0,
-               uint8_t deviceAddress = 0);
+    bool begin(
+        uint32_t baudRate = 9600,
+        BUS_TYPE busType = F1_F2,
+        int8_t rxPin = 16, 
+        int8_t txPin = 17, 
+        int8_t reDePin = 4,
+        uint8_t deviceClass = AddressClass_Undefined,
+        uint8_t deviceChannel = 0,
+        uint8_t deviceAddress = 0);
     
     // Stop the library
     void end();
