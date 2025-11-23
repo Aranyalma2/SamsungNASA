@@ -1,5 +1,7 @@
 /*
  * Samsung NASA Protocol - Basic Receiver Example
+ *
+ *  Author: Aranyalma2
  * 
  * This example demonstrates how to receive and decode NASA protocol packets
  * from HVAC devices.
@@ -13,8 +15,8 @@
  * - RS485 DI (Driver Input)    -> ESP32 GPIO17 (TX)
  * - RS485 RE (Receiver Enable) -> ESP32 GPIO4
  * - RS485 DE (Driver Enable)   -> ESP32 GPIO4
- * - RS485 A                    -> NASA A
- * - RS485 B                    -> NASA B
+ * - RS485 A                    -> NASA F1 or R1
+ * - RS485 B                    -> NASA F2 or R2
  * 
  * Note: RE and DE pins are typically connected together
  */
@@ -61,11 +63,11 @@ void onPacketReceived(const NASAPacket& packet) {
       
       // Decode specific known messages
       switch (msg->getMessageNumber()) {
-        case MSG_ENUM_IN_OPERATION_POWER:
+        case MessageNumber::ENUM_IN_OPERATION_POWER:
           Serial.printf("     -> Power: %s\n", msg->getValue() ? "ON" : "OFF");
           break;
           
-        case MSG_ENUM_IN_OPERATION_MODE:
+        case MessageNumber::ENUM_IN_OPERATION_MODE:
           {
             const char* modes[] = {"Auto", "Cool", "Dry", "Fan", "Heat"};
             uint8_t mode = msg->getValue();
@@ -74,9 +76,9 @@ void onPacketReceived(const NASAPacket& packet) {
             }
           }
           break;
-          
-        case MSG_ENUM_IN_FAN_MODE:
-        case MSG_ENUM_IN_FAN_MODE_REAL:
+
+        case MessageNumber::ENUM_IN_FAN_MODE:
+        case MessageNumber::ENUM_IN_FAN_MODE_REAL:
           {
             const char* fans[] = {"Auto", "Low", "Mid", "High", "Turbo"};
             uint8_t fan = msg->getValue();
@@ -85,16 +87,16 @@ void onPacketReceived(const NASAPacket& packet) {
             }
           }
           break;
-          
-        case MSG_VAR_IN_TEMP_TARGET_F:
+
+        case MessageNumber::VAR_IN_TEMP_TARGET_F:
           Serial.printf("     -> Target Temperature: %.1f°C\n", msg->getValue() / 10.0);
           break;
-          
-        case MSG_VAR_IN_TEMP_ROOM_F:
+
+        case MessageNumber::VAR_IN_TEMP_ROOM_F:
           Serial.printf("     -> Room Temperature: %.1f°C\n", msg->getValue() / 10.0);
           break;
-          
-        case MSG_VAR_OUT_ERROR_CODE:
+
+        case MessageNumber::VAR_OUT_ERROR_CODE:
           Serial.printf("     -> Error Code: 0x%04X\n", msg->getValue());
           break;
       }
@@ -116,8 +118,8 @@ void setup() {
   Serial.println("====================================\n");
   
   // Initialize NASA protocol
-  // Parameters: baudRate, rxPin, txPin, reDePin, deviceClass, deviceChannel, deviceAddress
-  if (!nasa.begin(9600, F1_F2, 16, 17, 4, AddressClass_Undefined, 0x0F, 0x01)) {
+  // Parameters: baudRate, rxPin, txPin, reDePin, busType, deviceClass, deviceChannel, deviceAddress
+  if (!nasa.begin(9600, 16, 17, 4, F1_F2, AddressClass::Undefined, 0x0F, 0x01)) {
     Serial.println("ERROR: Failed to initialize NASA protocol!");
     while (1) {
       delay(1000);

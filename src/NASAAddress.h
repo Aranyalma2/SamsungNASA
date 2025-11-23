@@ -6,7 +6,7 @@
 
 class NASAAddress {
 public:
-    NASAAddress(uint8_t klass = AddressClass_Undefined, uint8_t channel = 0, uint8_t address = 0);
+    NASAAddress(uint8_t klass = AddressClass::Undefined, uint8_t channel = 0, uint8_t address = 0);
     
     void decode(const uint8_t* data, size_t index);
     void encode(uint8_t* data, size_t index) const;

@@ -80,7 +80,7 @@ Temperatures are encoded as `value * 10`:
 
 ```cpp
 // Act as a central controller
-nasa.begin(9600, 16, 17, 4, AddressClass_CentralController, 0, 1);
+nasa.begin(9600, 16, 17, 4, AddressClass::CentralController, 0, 1);
 ```
 
 ### Packet Filtering
@@ -88,7 +88,7 @@ nasa.begin(9600, 16, 17, 4, AddressClass_CentralController, 0, 1);
 ```cpp
 void onPacketReceived(const NASAPacket& packet) {
   // Only process packets from indoor units
-  if (packet.getSourceAddress().getClass() != AddressClass_Indoor) {
+  if (packet.getSourceAddress().getClass() != AddressClass::Indoor) {
     return;
   }
   
@@ -100,7 +100,7 @@ void onPacketReceived(const NASAPacket& packet) {
 
 ```cpp
 // Send to all indoor units
-NASAAddress broadcast(AddressClass_BroadcastControlLayer, 0, 0);
+NASAAddress broadcast(AddressClass::BroadcastControlLayer, 0, 0);
 NASAPacket packet = nasa.createPacket(broadcast, DataType_Notification);
 // Add messages and send...
 ```

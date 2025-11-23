@@ -13,8 +13,8 @@
  * - RS485 DI (Driver Input)    -> ESP32 GPIO17 (TX)
  * - RS485 RE (Receiver Enable) -> ESP32 GPIO4
  * - RS485 DE (Driver Enable)   -> ESP32 GPIO4
- * - RS485 A                    -> NASA A
- * - RS485 B                    -> NASA B
+ * - RS485 A                    -> NASA F1 or R1
+ * - RS485 B                    -> NASA F2 or R2
  */
 
 #include <SamsungNASA.h>
@@ -23,7 +23,7 @@
 SamsungNASA nasa(Serial2);
 
 // Target device address (Broadcast to self-layer)
-NASAAddress broadcastAddr(AddressClass_BroadcastSelfLayer, 0x0F, 0xFF);
+NASAAddress broadcastAddr(AddressClass::BroadcastSelfLayer, 0x0F, 0xFF);
 
 void setup() {
   Serial.begin(115200);
@@ -32,11 +32,11 @@ void setup() {
   }
   
   Serial.println("\n====================================");
-  Serial.println("Samsung NASA Protocol - Basic Sender");
   Serial.println("====================================\n");
-  
-  // Initialize NASA protocol as an Outdoor device
-  if (!nasa.begin(9600, F1_F2, 16, 17, 4, AddressClass_Undefined, 0x0F, 0x00)) {
+
+  // Initialize NASA protocol
+  // Parameters: baudRate, rxPin, txPin, reDePin, busType, deviceClass, deviceChannel, deviceAddress
+  if (!nasa.begin(9600, 16, 17, 4, F1_F2, AddressClass::Undefined, 0x0F, 0x00)) {
     Serial.println("ERROR: Failed to initialize NASA protocol!");
     while (1) {
       delay(1000);
@@ -51,10 +51,10 @@ void loop() {
   Serial.println("Broadcasting registers (enum + variable) to all self-layer devices...");
 
   // Create a broadcast packet. Using DataType_Notification to indicate info update.
-  NASAPacket packet = nasa.createPacket(broadcastAddr, DataType_Notification);
+  NASAPacket packet = nasa.createPacket(broadcastAddr, DataType::Notification);
 
   // Example 1: Enum message (power ON)
-  NASAMessageSet msgPower(MSG_ENUM_IN_OPERATION_POWER);
+  NASAMessageSet msgPower(MessageNumber::ENUM_IN_OPERATION_POWER);
   msgPower.setValue(1); // 1 = ON
   packet.addMessage(msgPower);
 

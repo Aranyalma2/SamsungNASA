@@ -28,7 +28,7 @@ public:
         int8_t rxPin = 16, 
         int8_t txPin = 17, 
         int8_t reDePin = 4,
-        uint8_t deviceClass = AddressClass_Undefined,
+        uint8_t deviceClass = AddressClass::Undefined,
         uint8_t deviceChannel = 0,
         uint8_t deviceAddress = 0);
     
@@ -44,7 +44,7 @@ public:
     // Helper: Send a simple packet with messages
     bool sendPacket(const NASAAddress& destination,
                    DataType dataType,
-                   PacketType packetType = PacketType_Normal);
+                   PacketType packetType = PacketType::Normal);
     
     // Get device address
     const NASAAddress& getDeviceAddress() const { return _deviceAddress; }

@@ -44,6 +44,8 @@ private:
     size_t _messageCapacity;
     
     void ensureCapacity(size_t capacity);
+    
+    static uint16_t crc16(const uint8_t* data, size_t startIndex, size_t length);
 };
 
 #endif // NASA_PACKET_H

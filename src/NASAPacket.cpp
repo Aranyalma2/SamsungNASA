@@ -1,5 +1,21 @@
 #include "NASAPacket.h"
 
+// CRC16 implementation moved from NASAProtocol
+uint16_t NASAPacket::crc16(const uint8_t* data, size_t startIndex, size_t length) {
+    uint16_t crc = 0;
+    for (size_t index = startIndex; index < startIndex + length; index++) {
+        crc = crc ^ (data[index] << 8);
+        for (int i = 0; i < 8; i++) {
+            if (crc & 0x8000) {
+                crc = (crc << 1) ^ 0x1021;
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+    return crc & 0xFFFF;
+}
+
 NASAPacket::NASAPacket()
     : _messages(nullptr), _messageCount(0), _messageCapacity(0) {
 }
@@ -29,7 +45,7 @@ bool NASAPacket::decode(const uint8_t* data, size_t length) {
     }
     
     // Verify CRC
-    uint16_t crcActual = nasa_crc16(data, 3, size - 4);
+    uint16_t crcActual = NASAPacket::crc16(data, 3, size - 4);
     uint16_t crcExpected = (data[length - 3] << 8) | data[length - 2];
     if (crcExpected != crcActual) {
         return false;
@@ -105,7 +121,7 @@ size_t NASAPacket::encode(uint8_t* buffer, size_t maxLength) {
     buffer[2] = size & 0xFF;
     
     // Calculate and set CRC
-    uint16_t crc = nasa_crc16(buffer, 3, size - 4);
+    uint16_t crc = NASAPacket::crc16(buffer, 3, size - 4);
     buffer[cursor] = (crc >> 8) & 0xFF;
     buffer[cursor + 1] = crc & 0xFF;
     cursor += 2;
