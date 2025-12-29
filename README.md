@@ -55,6 +55,7 @@ RS485 A/B         →   Samsung F1/F2 or R1/R2 (Select proper BUS_TYPE)
 ### Temperature Encoding
 
 Temperatures are encoded as `value * 10`:
+
 - 24.0°C → 240
 - 18.5°C → 185
 - 30.0°C → 300
@@ -92,7 +93,7 @@ void onPacketReceived(const NASAPacket& packet) {
   if (packet.getSourceAddress().getClass() != AddressClass::Indoor) {
     return;
   }
-  
+
   // Process packet...
 }
 ```
