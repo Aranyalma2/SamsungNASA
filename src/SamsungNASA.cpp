@@ -15,10 +15,10 @@ SamsungNASA::~SamsungNASA() {
 }
 
 bool SamsungNASA::begin(uint32_t baudRate,
-                        BUS_TYPE busType,
                         int8_t rxPin, 
                         int8_t txPin, 
                         int8_t reDePin,
+                        BUS_TYPE busType,
                         uint8_t deviceClass,
                         uint8_t deviceChannel,
                         uint8_t deviceAddress) {
@@ -114,19 +114,19 @@ bool SamsungNASA::sendPacket(const NASAPacket& packet) {
 }
 
 bool SamsungNASA::sendPacket(const NASAAddress& destination,
-                             DataType dataType,
-                             PacketType packetType) {
+                             uint8_t dataType,
+                             uint8_t packetType) {
     NASAPacket packet = createPacket(destination, dataType);
     packet.getCommand().setPacketType(packetType);
     return sendPacket(packet);
 }
 
-NASAPacket SamsungNASA::createPacket(const NASAAddress& destination, DataType dataType) {
+NASAPacket SamsungNASA::createPacket(const NASAAddress& destination, uint8_t dataType) {
     NASAPacket packet;
     packet.getSourceAddress() = _deviceAddress;
     packet.getDestinationAddress() = destination;
     packet.getCommand().setDataType(dataType);
-    packet.getCommand().setPacketType(PacketType_Normal);
+    packet.getCommand().setPacketType(PacketType::Normal);
     packet.getCommand().setPacketNumber(_packetNumber++);
     return packet;
 }

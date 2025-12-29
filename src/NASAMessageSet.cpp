@@ -11,7 +11,7 @@ void NASAMessageSet::setMessageNumber(uint16_t value) {
 }
 
 void NASAMessageSet::updateType() {
-    _type = (MessageSetType)((_messageNumber & 0x0600) >> 9);
+    _type = (_messageNumber & 0x0600) >> 9;
 }
 
 size_t NASAMessageSet::decode(const uint8_t* data, size_t index) {
@@ -19,17 +19,17 @@ size_t NASAMessageSet::decode(const uint8_t* data, size_t index) {
     updateType();
     
     switch (_type) {
-        case MessageSetType_Enum:
+        case MessageSetType::Enum:
             _value = data[index + 2];
             _size = 3;
             break;
-            
-        case MessageSetType_Variable:
+
+        case MessageSetType::Variable:
             _value = (data[index + 2] << 8) | data[index + 3];
             _size = 4;
             break;
             
-        case MessageSetType_LongVariable:
+        case MessageSetType::LongVariable:
             _value = ((uint32_t)data[index + 2] << 24) |
                     ((uint32_t)data[index + 3] << 16) |
                     ((uint32_t)data[index + 4] << 8) |
@@ -37,7 +37,7 @@ size_t NASAMessageSet::decode(const uint8_t* data, size_t index) {
             _size = 6;
             break;
             
-        case MessageSetType_Structure:
+        case MessageSetType::Structure:
             // Structure size needs to be determined by packet length
             _size = 2;
             break;
@@ -51,23 +51,23 @@ size_t NASAMessageSet::encode(uint8_t* data, size_t index) const {
     data[index + 1] = _messageNumber & 0xFF;
     
     switch (_type) {
-        case MessageSetType_Enum:
+        case MessageSetType::Enum:
             data[index + 2] = _value & 0xFF;
             return 3;
             
-        case MessageSetType_Variable:
+        case MessageSetType::Variable:
             data[index + 2] = (_value >> 8) & 0xFF;
             data[index + 3] = _value & 0xFF;
             return 4;
             
-        case MessageSetType_LongVariable:
+        case MessageSetType::LongVariable:
             data[index + 2] = (_value >> 24) & 0xFF;
             data[index + 3] = (_value >> 16) & 0xFF;
             data[index + 4] = (_value >> 8) & 0xFF;
             data[index + 5] = _value & 0xFF;
             return 6;
             
-        case MessageSetType_Structure:
+        case MessageSetType::Structure:
             return 2;
     }
     

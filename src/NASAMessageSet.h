@@ -12,7 +12,7 @@ public:
     size_t encode(uint8_t* data, size_t index) const;
     
     uint16_t getMessageNumber() const { return _messageNumber; }
-    MessageSetType getType() const { return _type; }
+    uint8_t getType() const { return _type; }
     uint32_t getValue() const { return _value; }
     
     void setMessageNumber(uint16_t value);
@@ -22,7 +22,7 @@ public:
     
 private:
     uint16_t _messageNumber;
-    MessageSetType _type;
+    uint8_t _type;
     uint32_t _value;
     size_t _size;
     

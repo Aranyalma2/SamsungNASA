@@ -104,7 +104,7 @@ namespace MessageNumber {
         LVAR_OUT_CONTROL_WATTMETER_1W_1MIN_SUM = 0x8413,
         LVAR_OUT_CONTROL_WATTMETER_ALL_UNIT_ACCUM = 0x8414,
         LVAR_NM_OUT_SENSOR_VOLTAGE = 0x24FC
-    }
-};
+    };
+}
 
 #endif // NASA_PROTOCOL_H

@@ -1,6 +1,7 @@
 # SamsungNASA - Samsung NASA Protocol Library for ESP32
 
 An Arduino library for communicating with Samsung HVAC systems using the NASA protocol over RS485. Optimized exclusively for ESP32 with FreeRTOS async packet handling.
+For AVR architecture check this: [SamsungNASA-AVR](https://github.com/Aranyalma2/SamsungNASA-AVR)
 
 ## Features
 
@@ -30,7 +31,7 @@ DE (Driver Enable)→   GPIO4 (connect RE and DE together)
 VCC               →   3.3V
 GND               →   GND
 
-RS485 A/B         →   Samsung F1/F2
+RS485 A/B         →   Samsung F1/F2 or R1/R2 (Select proper BUS_TYPE)
 ```
 
 ## Protocol Details

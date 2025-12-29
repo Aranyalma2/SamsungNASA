@@ -4,8 +4,8 @@ NASACommand::NASACommand()
     : _packetInformation(true),
       _protocolVersion(2),
       _retryCount(0),
-      _packetType(PacketType_StandBy),
-      _dataType(DataType_Undefined),
+      _packetType(PacketType::StandBy),
+      _dataType(DataType::Undefined),
       _packetNumber(0) {
 }
 
@@ -13,8 +13,8 @@ void NASACommand::decode(const uint8_t* data, size_t index) {
     _packetInformation = ((data[index] & 0x80) >> 7) == 1;
     _protocolVersion = (data[index] & 0x60) >> 5;
     _retryCount = (data[index] & 0x18) >> 3;
-    _packetType = (PacketType)((data[index + 1] & 0xF0) >> 4);
-    _dataType = (DataType)(data[index + 1] & 0x0F);
+    _packetType = (data[index + 1] & 0xF0) >> 4;
+    _dataType = data[index + 1] & 0x0F;
     _packetNumber = data[index + 2];
 }
 
