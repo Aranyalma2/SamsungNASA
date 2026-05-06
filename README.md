@@ -17,7 +17,7 @@ For AVR architecture check this: [SamsungNASA-AVR](https://github.com/Aranyalma2
 
 - **ESP32** development board (any variant)
 - **RS485 Transceiver** module (e.g. MAX3485, or similar)
-- Connection to **Samsung HVAC** system NASA bus
+- Connection to **Samsung HVAC** NASA bus
 
 ## Wiring
 
