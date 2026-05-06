@@ -4,7 +4,7 @@ NASACommand::NASACommand()
     : _packetInformation(true),
       _protocolVersion(2),
       _retryCount(0),
-      _packetType(PacketType::StandBy),
+      _packetType(PacketType::Normal),
       _dataType(DataType::Undefined),
       _packetNumber(0) {
 }

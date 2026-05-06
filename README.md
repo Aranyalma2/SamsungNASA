@@ -5,7 +5,7 @@ For AVR architecture check this: [SamsungNASA-AVR](https://github.com/Aranyalma2
 
 ## Features
 
-- **Full NASA Protocol Implementation** - Complete encoding/decoding based on relativly new (but unknown) version of the protocol
+- **Full NASA Protocol Implementation** - Complete encoding/decoding based on relativly new version of the protocol
 - **ESP32 Optimized** - Uses FreeRTOS for async packet handling
 - **RS485 Support** - Built-in RE/DE pin control for RS485 transceivers
 - **CRC16 Validation** - Automatic packet integrity checking
@@ -24,14 +24,14 @@ For AVR architecture check this: [SamsungNASA-AVR](https://github.com/Aranyalma2
 ```
 RS485 Module          ESP32
 ─────────────────────────────
-RO (Receiver Out) →   GPIO16 (RX)
-DI (Driver In)    →   GPIO17 (TX)
-RE (Recv Enable)  →   GPIO4
-DE (Driver Enable)→   GPIO4 (connect RE and DE together)
-VCC               →   3.3V
-GND               →   GND
+RO (Receiver Out) ->   GPIO16 (RX)
+DI (Driver In)    ->   GPIO17 (TX)
+RE (Recv Enable)  ->   GPIO4
+DE (Driver Enable)->   GPIO4 (connect RE and DE together)
+VCC               ->   3.3V
+GND               ->   GND
 
-RS485 A/B         →   Samsung F1/F2 or R1/R2 (Select proper BUS_TYPE)
+RS485 A/B         ->   Samsung F1/F2, F3/F4, R1/R2
 ```
 
 ## Protocol Details
@@ -56,9 +56,9 @@ RS485 A/B         →   Samsung F1/F2 or R1/R2 (Select proper BUS_TYPE)
 
 Temperatures are encoded as `value * 10`:
 
-- 24.0°C → 240
-- 18.5°C → 185
-- 30.0°C → 300
+- 24.0°C -> 240
+- 18.5°C -> 185
+- 30.0°C -> 300
 
 ## Troubleshooting
 
