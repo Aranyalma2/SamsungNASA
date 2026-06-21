@@ -69,7 +69,7 @@ size_t NASAMessageSet::decode(const uint8_t* data, size_t index, size_t limit) {
             break;
 
         case MessageSetType::Structure:
-            _size = 2;
+            _size = limit;
             break;
     }
 
