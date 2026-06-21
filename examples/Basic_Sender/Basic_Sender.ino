@@ -20,7 +20,7 @@
 #include <SamsungNASA.h>
 
 // Create NASA protocol instance
-SamsungNASA nasa(Serial2);
+SamsungNASA nasa;
 
 // Target device address (Broadcast to self-layer)
 NASAAddress broadcastAddr(AddressClass::BroadcastSelfLayer, 0x0F, 0xFF);
@@ -35,8 +35,8 @@ void setup() {
     Serial.println("====================================\n");
 
     // Initialize NASA protocol
-    // Parameters: baudRate, rxPin, txPin, reDePin, deviceClass, deviceChannel, deviceAddress
-    if (!nasa.begin(9600, 16, 17, 4, AddressClass::Undefined, 0x0F, 0x00)) {
+    // Parameters: serial, rxPin, txPin, reDePin, deviceClass, deviceChannel, deviceAddress
+    if (!nasa.begin(&Serial2, 16, 17, 4, AddressClass::Undefined, 0x0F, 0x00)) {
         Serial.println("ERROR: Failed to initialize NASA protocol!");
         while (1) {
             delay(1000);

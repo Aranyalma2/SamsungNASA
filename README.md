@@ -82,7 +82,7 @@ Temperatures are encoded as `value * 10`:
 
 ```cpp
 // Act as a central controller
-nasa.begin(9600, 16, 17, 4, AddressClass::CentralController, 0, 1);
+nasa.begin(&Serial1, 16, 17, 4, AddressClass::CentralController, 0, 1);
 ```
 
 ### Packet Filtering

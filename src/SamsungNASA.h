@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <HardwareSerial.h>
+#include <Stream.h>
 
 #include "NASAPacket.h"
 #include "NASAProtocol.h"
@@ -14,15 +15,22 @@ typedef void (*PacketHandler)(const NASAPacket& packet);
 
 class SamsungNASA {
    public:
-    SamsungNASA(HardwareSerial& serial = Serial2);
+    SamsungNASA();
     ~SamsungNASA();
 
     // Initialize the library
     bool begin(
-        uint32_t baudRate = 9600,
+        HardwareSerial* serial,
         int8_t rxPin = 16,
         int8_t txPin = 17,
         int8_t reDePin = 4,
+        uint8_t deviceClass = AddressClass::Undefined,
+        uint8_t deviceChannel = 0,
+        uint8_t deviceAddress = 0);
+
+    // Alternative begin with outside Serial initialization
+    bool begin(
+        Stream* serial,
         uint8_t deviceClass = AddressClass::Undefined,
         uint8_t deviceChannel = 0,
         uint8_t deviceAddress = 0);
@@ -48,8 +56,9 @@ class SamsungNASA {
     NASAPacket createPacket(const NASAAddress& destination, uint8_t dataType);
 
    private:
-    HardwareSerial& _serial;
-    int8_t _reDePin;
+    Stream* _serial;
+    HardwareSerial* _hwSerial;
+    int8_t _reDePin = -1;
     NASAAddress _deviceAddress;
     PacketHandler _packetHandler;
     uint8_t _packetNumber;
@@ -61,6 +70,8 @@ class SamsungNASA {
     // Receive buffer
     uint8_t _receiveBuffer[NASA_MAX_PACKET_SIZE];
     size_t _receiveBufferPos;
+    NASAPacket _receivePacket;
+    TickType_t _lastByteTime;
 
     // Task functions
     static void receiveTask(void* parameter);

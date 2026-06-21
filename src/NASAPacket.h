@@ -12,6 +12,10 @@ class NASAPacket {
    public:
     NASAPacket();
     ~NASAPacket();
+    NASAPacket(const NASAPacket& other);
+    NASAPacket& operator=(const NASAPacket& other);
+    NASAPacket(NASAPacket&& other) noexcept;
+    NASAPacket& operator=(NASAPacket&& other) noexcept;
 
     bool decode(const uint8_t* data, size_t length);
     size_t encode(uint8_t* buffer, size_t maxLength);

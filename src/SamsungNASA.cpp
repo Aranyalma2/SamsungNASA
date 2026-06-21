@@ -1,26 +1,34 @@
 #include "SamsungNASA.h"
 
-SamsungNASA::SamsungNASA(HardwareSerial& serial)
-    : _serial(serial),
+SamsungNASA::SamsungNASA()
+    : _serial(nullptr),
+      _hwSerial(nullptr),
       _reDePin(-1),
       _packetHandler(nullptr),
       _packetNumber(0),
       _receiveTaskHandle(nullptr),
       _sendMutex(nullptr),
-      _receiveBufferPos(0) {
+      _receiveBufferPos(0),
+      _lastByteTime(0) {
 }
 
 SamsungNASA::~SamsungNASA() {
     end();
 }
 
-bool SamsungNASA::begin(uint32_t baudRate,
-                        int8_t rxPin,
-                        int8_t txPin,
-                        int8_t reDePin,
-                        uint8_t deviceClass,
-                        uint8_t deviceChannel,
-                        uint8_t deviceAddress) {
+bool SamsungNASA::begin(
+    HardwareSerial* serial,
+    int8_t rxPin,
+    int8_t txPin,
+    int8_t reDePin,
+    uint8_t deviceClass,
+    uint8_t deviceChannel,
+    uint8_t deviceAddress) {
+    if (serial == nullptr) {
+        return false;
+    }
+    _hwSerial = serial;
+    _serial = serial;
     _reDePin = reDePin;
     _deviceAddress = NASAAddress(deviceClass, deviceChannel, deviceAddress);
 
@@ -30,10 +38,41 @@ bool SamsungNASA::begin(uint32_t baudRate,
         setReceiveMode();
     }
 
-    // Initialize serial
-    _serial.begin(baudRate, SERIAL_8E1, rxPin, txPin);
+    // Initialize serial (9600 baud, Even parity, 1 stop bit)
+    _hwSerial->begin(9600, SERIAL_8E1, rxPin, txPin);
 
     // Create mutex
+    _sendMutex = xSemaphoreCreateMutex();
+    if (_sendMutex == nullptr) {
+        return false;
+    }
+
+    // Create receive task
+    BaseType_t result = xTaskCreate(
+        receiveTask,
+        "NASA_RX",
+        4096,
+        this,
+        5,
+        &_receiveTaskHandle);
+
+    if (result != pdPASS) {
+        vSemaphoreDelete(_sendMutex);
+        _sendMutex = nullptr;
+        return false;
+    }
+
+    return true;
+}
+
+bool SamsungNASA::begin(Stream* serial, uint8_t deviceClass, uint8_t deviceChannel, uint8_t deviceAddress) {
+    if (serial == nullptr) {
+        return false;
+    }
+    _serial = serial;
+    _hwSerial = nullptr;
+    _deviceAddress = NASAAddress(deviceClass, deviceChannel, deviceAddress);
+
     _sendMutex = xSemaphoreCreateMutex();
     if (_sendMutex == nullptr) {
         return false;
@@ -70,7 +109,9 @@ void SamsungNASA::end() {
         _sendMutex = nullptr;
     }
 
-    _serial.end();
+    if (_hwSerial != nullptr) {
+        _hwSerial->end();
+    }
 }
 
 void SamsungNASA::setPacketHandler(PacketHandler handler) {
@@ -99,8 +140,10 @@ bool SamsungNASA::sendPacket(const NASAPacket& packet) {
     setTransmitMode();
 
     // Send data
-    _serial.write(buffer, length);
-    _serial.flush();
+    if (_serial != nullptr) {
+        _serial->write(buffer, length);
+        _serial->flush();
+    }
 
     // Set receive mode
     setReceiveMode();
@@ -146,24 +189,36 @@ void SamsungNASA::receiveTask(void* parameter) {
     SamsungNASA* instance = static_cast<SamsungNASA*>(parameter);
 
     while (true) {
-        if (instance->_serial.available()) {
-            uint8_t byte = instance->_serial.read();
+        if (instance->_serial != nullptr && instance->_serial->available()) {
+            TickType_t now = xTaskGetTickCount();
+            if (instance->_receiveBufferPos > 0) {
+                if (now - instance->_lastByteTime > pdMS_TO_TICKS(50)) {
+                    instance->_receiveBufferPos = 0;
+                }
+            }
 
-            // Check for start byte
-            if (byte == NASA_START_BYTE) {
-                instance->_receiveBufferPos = 0;
+            uint8_t byte = instance->_serial->read();
+            instance->_lastByteTime = now;
+
+            if (instance->_receiveBufferPos == 0) {
+                if (byte != NASA_START_BYTE) {
+                    continue;  // Skip bytes before a valid start byte
+                }
             }
 
             // Add to buffer
             if (instance->_receiveBufferPos < NASA_MAX_PACKET_SIZE) {
                 instance->_receiveBuffer[instance->_receiveBufferPos++] = byte;
 
-                // Check if we have a complete packet
+                // Check if we have a complete packet header
                 if (instance->_receiveBufferPos >= 3) {
                     size_t expectedSize = (instance->_receiveBuffer[1] << 8) | instance->_receiveBuffer[2];
                     size_t totalSize = expectedSize + 2;
 
-                    if (instance->_receiveBufferPos >= totalSize) {
+                    if (totalSize < NASA_MIN_PACKET_SIZE || totalSize > NASA_MAX_PACKET_SIZE) {
+                        // Invalid size, reset buffer to find next start byte
+                        instance->_receiveBufferPos = 0;
+                    } else if (instance->_receiveBufferPos >= totalSize) {
                         instance->processReceiveBuffer();
                         instance->_receiveBufferPos = 0;
                     }
@@ -179,11 +234,9 @@ void SamsungNASA::receiveTask(void* parameter) {
 }
 
 void SamsungNASA::processReceiveBuffer() {
-    NASAPacket packet;
-
-    if (packet.decode(_receiveBuffer, _receiveBufferPos)) {
+    if (_receivePacket.decode(_receiveBuffer, _receiveBufferPos)) {
         if (_packetHandler != nullptr) {
-            _packetHandler(packet);
+            _packetHandler(_receivePacket);
         }
     }
 }
