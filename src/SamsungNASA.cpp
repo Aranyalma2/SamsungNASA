@@ -8,7 +8,8 @@ SamsungNASA::SamsungNASA()
       _packetNumber(0),
       _receiveTaskHandle(nullptr),
       _sendMutex(nullptr),
-      _receiveBufferPos(0) {
+      _receiveBufferPos(0),
+      _lastByteTime(0) {
 }
 
 SamsungNASA::~SamsungNASA() {
@@ -189,23 +190,35 @@ void SamsungNASA::receiveTask(void* parameter) {
 
     while (true) {
         if (instance->_serial != nullptr && instance->_serial->available()) {
-            uint8_t byte = instance->_serial->read();
+            TickType_t now = xTaskGetTickCount();
+            if (instance->_receiveBufferPos > 0) {
+                if (now - instance->_lastByteTime > pdMS_TO_TICKS(50)) {
+                    instance->_receiveBufferPos = 0;
+                }
+            }
 
-            // Check for start byte
-            if (byte == NASA_START_BYTE) {
-                instance->_receiveBufferPos = 0;
+            uint8_t byte = instance->_serial->read();
+            instance->_lastByteTime = now;
+
+            if (instance->_receiveBufferPos == 0) {
+                if (byte != NASA_START_BYTE) {
+                    continue; // Skip bytes before a valid start byte
+                }
             }
 
             // Add to buffer
             if (instance->_receiveBufferPos < NASA_MAX_PACKET_SIZE) {
                 instance->_receiveBuffer[instance->_receiveBufferPos++] = byte;
 
-                // Check if we have a complete packet
+                // Check if we have a complete packet header
                 if (instance->_receiveBufferPos >= 3) {
                     size_t expectedSize = (instance->_receiveBuffer[1] << 8) | instance->_receiveBuffer[2];
                     size_t totalSize = expectedSize + 2;
 
-                    if (instance->_receiveBufferPos >= totalSize) {
+                    if (totalSize < NASA_MIN_PACKET_SIZE || totalSize > NASA_MAX_PACKET_SIZE) {
+                        // Invalid size, reset buffer to find next start byte
+                        instance->_receiveBufferPos = 0;
+                    } else if (instance->_receiveBufferPos >= totalSize) {
                         instance->processReceiveBuffer();
                         instance->_receiveBufferPos = 0;
                     }
@@ -221,11 +234,9 @@ void SamsungNASA::receiveTask(void* parameter) {
 }
 
 void SamsungNASA::processReceiveBuffer() {
-    NASAPacket packet;
-
-    if (packet.decode(_receiveBuffer, _receiveBufferPos)) {
+    if (_receivePacket.decode(_receiveBuffer, _receiveBufferPos)) {
         if (_packetHandler != nullptr) {
-            _packetHandler(packet);
+            _packetHandler(_receivePacket);
         }
     }
 }

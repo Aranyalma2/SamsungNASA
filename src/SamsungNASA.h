@@ -70,6 +70,8 @@ class SamsungNASA {
     // Receive buffer
     uint8_t _receiveBuffer[NASA_MAX_PACKET_SIZE];
     size_t _receiveBufferPos;
+    NASAPacket _receivePacket;
+    TickType_t _lastByteTime;
 
     // Task functions
     static void receiveTask(void* parameter);
