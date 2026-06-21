@@ -26,7 +26,7 @@ bool SamsungNASA::begin(
     uint8_t deviceAddress) {
     if (serial == nullptr) {
         return false;
-      }
+    }
     _hwSerial = serial;
     _serial = serial;
     _reDePin = reDePin;
@@ -202,7 +202,7 @@ void SamsungNASA::receiveTask(void* parameter) {
 
             if (instance->_receiveBufferPos == 0) {
                 if (byte != NASA_START_BYTE) {
-                    continue; // Skip bytes before a valid start byte
+                    continue;  // Skip bytes before a valid start byte
                 }
             }
 
