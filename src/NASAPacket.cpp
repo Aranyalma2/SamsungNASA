@@ -74,8 +74,15 @@ bool NASAPacket::decode(const uint8_t* data, size_t length) {
     ensureCapacity(capacity);
 
     for (uint8_t i = 0; i < capacity; i++) {
+        if (cursor >= length - 3) {
+            return false;
+        }
         NASAMessageSet message;
-        size_t msgSize = message.decode(data, cursor);
+        size_t limit = (length - 3) - cursor;
+        size_t msgSize = message.decode(data, cursor, limit);
+        if (msgSize == 0) {
+            return false;
+        }
         _messages[_messageCount++] = message;
         cursor += msgSize;
     }
@@ -108,6 +115,10 @@ size_t NASAPacket::encode(uint8_t* buffer, size_t maxLength) {
 
     // Encode messages
     for (size_t i = 0; i < _messageCount; i++) {
+        size_t expectedMsgSize = _messages[i].getSize();
+        if (cursor + expectedMsgSize + 3 > maxLength) {
+            return 0;
+        }
         size_t msgSize = _messages[i].encode(buffer, cursor);
         cursor += msgSize;
     }

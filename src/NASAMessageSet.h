@@ -9,7 +9,7 @@ class NASAMessageSet {
    public:
     NASAMessageSet(uint16_t messageNumber = 0);
 
-    size_t decode(const uint8_t* data, size_t index);
+    size_t decode(const uint8_t* data, size_t index, size_t limit);
     size_t encode(uint8_t* data, size_t index) const;
 
     uint16_t getMessageNumber() const { return _messageNumber; }

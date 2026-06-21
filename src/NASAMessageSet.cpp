@@ -12,24 +12,55 @@ void NASAMessageSet::setMessageNumber(uint16_t value) {
 
 void NASAMessageSet::updateType() {
     _type = (_messageNumber & 0x0600) >> 9;
+    switch (_type) {
+        case MessageSetType::Enum:
+            _size = 3;
+            break;
+        case MessageSetType::Variable:
+            _size = 4;
+            break;
+        case MessageSetType::LongVariable:
+            _size = 6;
+            break;
+        case MessageSetType::Structure:
+        default:
+            _size = 2;
+            break;
+    }
 }
 
-size_t NASAMessageSet::decode(const uint8_t* data, size_t index) {
+size_t NASAMessageSet::decode(const uint8_t* data, size_t index, size_t limit) {
+    if (limit < 2) {
+        _size = 0;
+        return 0;
+    }
     _messageNumber = (data[index] << 8) | data[index + 1];
     updateType();
 
     switch (_type) {
         case MessageSetType::Enum:
+            if (limit < 3) {
+                _size = 0;
+                return 0;
+            }
             _value = data[index + 2];
             _size = 3;
             break;
 
         case MessageSetType::Variable:
+            if (limit < 4) {
+                _size = 0;
+                return 0;
+            }
             _value = (data[index + 2] << 8) | data[index + 3];
             _size = 4;
             break;
 
         case MessageSetType::LongVariable:
+            if (limit < 6) {
+                _size = 0;
+                return 0;
+            }
             _value = ((uint32_t)data[index + 2] << 24) |
                      ((uint32_t)data[index + 3] << 16) |
                      ((uint32_t)data[index + 4] << 8) |
@@ -38,7 +69,6 @@ size_t NASAMessageSet::decode(const uint8_t* data, size_t index) {
             break;
 
         case MessageSetType::Structure:
-            // Structure size needs to be determined by packet length
             _size = 2;
             break;
     }
