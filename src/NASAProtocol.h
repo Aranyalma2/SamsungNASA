@@ -205,7 +205,7 @@ enum : uint16_t {
     ENUM_IN_OPERATION_MODE_REAL = 0x4002,   // Indoor unit current operation mode. 0 Auto, 1 Cool, 2 Dry, 3 Fan, 4 Heat, 11 Auto Cool, 12 Auto Dry, 13 Auto Fan, 14 Auto Heat, 21 Cool Storage, 24 Hot water, 255 NULL mode. Alias: NASA_INDOOR_REAL_OPMODE
     ENUM_IN_OPERATION_VENT_POWER = 0x4003,  // Ventilation operation mode. Alias: NASA_ERV_POWER
     ENUM_IN_OPERATION_VENT_MODE = 0x4004,   // Alias: NASA_ERV_OPMODE
-    NASA_FANSPEED = 0x4006,
+    ENUM_IN_FAN_MODE = 0x4006,
     ENUM_IN_FAN_MODE_REAL = 0x4007,         // Indoor unit current air volume
     ENUM_IN_FAN_VENT_MODE = 0x4008,         // Indoor unit current air volume. Alias: NASA_ERV_FANSPEED
     ENUM_IN_LOUVER_HL_SWING = 0x4011,       // Up and down wind direction setting/status. Alias: NASA_AIRFLOW_UPDOWN

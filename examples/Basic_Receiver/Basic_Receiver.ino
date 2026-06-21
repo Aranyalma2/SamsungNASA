@@ -23,8 +23,8 @@
 
 #include <SamsungNASA.h>
 
-// Create NASA protocol instance using Serial2
-SamsungNASA nasa(Serial2);
+// Create NASA protocol instance
+SamsungNASA nasa;
 
 // Packet handler callback function
 void onPacketReceived(const NASAPacket& packet) {
@@ -114,8 +114,8 @@ void setup() {
     Serial.println("====================================\n");
 
     // Initialize NASA protocol
-    // Parameters: baudRate, rxPin, txPin, reDePin, deviceClass, deviceChannel, deviceAddress
-    if (!nasa.begin(9600, 16, 17, 4, AddressClass::Undefined, 0x0F, 0x01)) {
+    // Parameters: serial, rxPin, txPin, reDePin, deviceClass, deviceChannel, deviceAddress
+    if (!nasa.begin(&Serial2, 16, 17, 4, AddressClass::Undefined, 0x0F, 0x01)) {
         Serial.println("ERROR: Failed to initialize NASA protocol!");
         while (1) {
             delay(1000);
