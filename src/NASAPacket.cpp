@@ -26,6 +26,73 @@ NASAPacket::~NASAPacket() {
     }
 }
 
+NASAPacket::NASAPacket(const NASAPacket& other)
+    : _sourceAddress(other._sourceAddress),
+      _destinationAddress(other._destinationAddress),
+      _command(other._command),
+      _messages(nullptr),
+      _messageCount(other._messageCount),
+      _messageCapacity(other._messageCapacity) {
+    if (other._messages && _messageCapacity > 0) {
+        _messages = new NASAMessageSet[_messageCapacity];
+        for (size_t i = 0; i < _messageCount; i++) {
+            _messages[i] = other._messages[i];
+        }
+    }
+}
+
+NASAPacket& NASAPacket::operator=(const NASAPacket& other) {
+    if (this != &other) {
+        if (_messages) {
+            delete[] _messages;
+            _messages = nullptr;
+        }
+        _sourceAddress = other._sourceAddress;
+        _destinationAddress = other._destinationAddress;
+        _command = other._command;
+        _messageCount = other._messageCount;
+        _messageCapacity = other._messageCapacity;
+        if (other._messages && _messageCapacity > 0) {
+            _messages = new NASAMessageSet[_messageCapacity];
+            for (size_t i = 0; i < _messageCount; i++) {
+                _messages[i] = other._messages[i];
+            }
+        }
+    }
+    return *this;
+}
+
+NASAPacket::NASAPacket(NASAPacket&& other) noexcept
+    : _sourceAddress(std::move(other._sourceAddress)),
+      _destinationAddress(std::move(other._destinationAddress)),
+      _command(std::move(other._command)),
+      _messages(other._messages),
+      _messageCount(other._messageCount),
+      _messageCapacity(other._messageCapacity) {
+    other._messages = nullptr;
+    other._messageCount = 0;
+    other._messageCapacity = 0;
+}
+
+NASAPacket& NASAPacket::operator=(NASAPacket&& other) noexcept {
+    if (this != &other) {
+        if (_messages) {
+            delete[] _messages;
+        }
+        _sourceAddress = std::move(other._sourceAddress);
+        _destinationAddress = std::move(other._destinationAddress);
+        _command = std::move(other._command);
+        _messages = other._messages;
+        _messageCount = other._messageCount;
+        _messageCapacity = other._messageCapacity;
+
+        other._messages = nullptr;
+        other._messageCount = 0;
+        other._messageCapacity = 0;
+    }
+    return *this;
+}
+
 bool NASAPacket::decode(const uint8_t* data, size_t length) {
     if (data[0] != NASA_START_BYTE) {
         return false;
