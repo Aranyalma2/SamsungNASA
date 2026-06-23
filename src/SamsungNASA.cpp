@@ -1,5 +1,7 @@
 #include "SamsungNASA.h"
 
+#include <esp_log.h>
+
 SamsungNASA::SamsungNASA()
     : _serial(nullptr),
       _hwSerial(nullptr),
@@ -187,56 +189,73 @@ void SamsungNASA::setReceiveMode() {
 
 void SamsungNASA::receiveTask(void* parameter) {
     SamsungNASA* instance = static_cast<SamsungNASA*>(parameter);
+    size_t totalSize = 0;
+
+    ESP_LOGI("NASA_RX", "NASA receive task started");
 
     while (true) {
+        bool readAny = false;
         if (instance->_serial != nullptr && instance->_serial->available()) {
             TickType_t now = xTaskGetTickCount();
-            if (instance->_receiveBufferPos > 0) {
-                if (now - instance->_lastByteTime > pdMS_TO_TICKS(50)) {
-                    instance->_receiveBufferPos = 0;
-                }
-            }
+            while (instance->_serial->available()) {
+                uint8_t byte = instance->_serial->read();
+                instance->_lastByteTime = now;
+                readAny = true;
 
-            uint8_t byte = instance->_serial->read();
-            instance->_lastByteTime = now;
-
-            if (instance->_receiveBufferPos == 0) {
-                if (byte != NASA_START_BYTE) {
-                    continue;  // Skip bytes before a valid start byte
-                }
-            }
-
-            // Add to buffer
-            if (instance->_receiveBufferPos < NASA_MAX_PACKET_SIZE) {
-                instance->_receiveBuffer[instance->_receiveBufferPos++] = byte;
-
-                // Check if we have a complete packet header
-                if (instance->_receiveBufferPos >= 3) {
-                    size_t expectedSize = (instance->_receiveBuffer[1] << 8) | instance->_receiveBuffer[2];
-                    size_t totalSize = expectedSize + 2;
-
-                    if (totalSize < NASA_MIN_PACKET_SIZE || totalSize > NASA_MAX_PACKET_SIZE) {
-                        // Invalid size, reset buffer to find next start byte
-                        instance->_receiveBufferPos = 0;
-                    } else if (instance->_receiveBufferPos >= totalSize) {
-                        instance->processReceiveBuffer();
-                        instance->_receiveBufferPos = 0;
+                if (instance->_receiveBufferPos == 0) {
+                    if (byte != NASA_START_BYTE) {
+                        continue; // Skip bytes before a valid start byte
                     }
                 }
-            } else {
-                // Buffer overflow, reset
-                instance->_receiveBufferPos = 0;
+
+                // Add to buffer
+                if (instance->_receiveBufferPos < NASA_MAX_PACKET_SIZE) {
+                    instance->_receiveBuffer[instance->_receiveBufferPos++] = byte;
+
+                    // Check if we have a complete packet header
+                    if (instance->_receiveBufferPos == 3) {
+                        size_t expectedSize = (instance->_receiveBuffer[1] << 8) | instance->_receiveBuffer[2];
+                        totalSize = expectedSize + 2;
+
+                        if (totalSize < NASA_MIN_PACKET_SIZE || totalSize > NASA_MAX_PACKET_SIZE) {
+                            // Invalid size, reset buffer to find next start byte
+                            instance->_receiveBufferPos = 0;
+                            totalSize = 0;
+                        }
+                    } else if (instance->_receiveBufferPos >= 3 && instance->_receiveBufferPos == totalSize) {
+                        instance->processReceiveBuffer();
+                        instance->_receiveBufferPos = 0;
+                        totalSize = 0;
+                    }
+                } else {
+                    // Buffer overflow, reset
+                    instance->_receiveBufferPos = 0;
+                    totalSize = 0;
+                }
             }
-        } else {
+        }
+
+        if (!readAny) {
+            // No data was read. Check for timeout.
+            if (instance->_receiveBufferPos > 0) {
+                if (xTaskGetTickCount() - instance->_lastByteTime > pdMS_TO_TICKS(500)) {
+                    ESP_LOGD("NASA_RX", "Receive buffer timeout");
+                    instance->_receiveBufferPos = 0;
+                    totalSize = 0;
+                }
+            }
             vTaskDelay(pdMS_TO_TICKS(1));
         }
     }
 }
 
 void SamsungNASA::processReceiveBuffer() {
+    ESP_LOGD("NASA_RX", "NASA message received");
     if (_receivePacket.decode(_receiveBuffer, _receiveBufferPos)) {
         if (_packetHandler != nullptr) {
             _packetHandler(_receivePacket);
         }
+    } else {
+        ESP_LOGD("NASA_RX", "NASA message decoding failed");
     }
 }
