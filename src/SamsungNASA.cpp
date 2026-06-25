@@ -53,7 +53,7 @@ bool SamsungNASA::begin(
     BaseType_t result = xTaskCreate(
         receiveTask,
         "NASA_RX",
-        4096,
+        NASA_TASK_STACK_SIZE,
         this,
         5,
         &_receiveTaskHandle);
@@ -84,7 +84,7 @@ bool SamsungNASA::begin(Stream* serial, uint8_t deviceClass, uint8_t deviceChann
     BaseType_t result = xTaskCreate(
         receiveTask,
         "NASA_RX",
-        4096,
+        NASA_TASK_STACK_SIZE,
         this,
         5,
         &_receiveTaskHandle);
@@ -191,8 +191,6 @@ void SamsungNASA::receiveTask(void* parameter) {
     SamsungNASA* instance = static_cast<SamsungNASA*>(parameter);
     size_t totalSize = 0;
 
-    ESP_LOGI("NASA_RX", "NASA receive task started");
-
     while (true) {
         bool readAny = false;
         if (instance->_serial != nullptr && instance->_serial->available()) {
@@ -239,7 +237,6 @@ void SamsungNASA::receiveTask(void* parameter) {
             // No data was read. Check for timeout.
             if (instance->_receiveBufferPos > 0) {
                 if (xTaskGetTickCount() - instance->_lastByteTime > pdMS_TO_TICKS(500)) {
-                    ESP_LOGD("NASA_RX", "Receive buffer timeout");
                     instance->_receiveBufferPos = 0;
                     totalSize = 0;
                 }

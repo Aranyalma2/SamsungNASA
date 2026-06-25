@@ -6,8 +6,12 @@
 // Protocol constants
 #define NASA_START_BYTE 0x32
 #define NASA_END_BYTE 0x34
+#ifndef NASA_MIN_PACKET_SIZE
 #define NASA_MIN_PACKET_SIZE 16
+#endif
+#ifndef NASA_MAX_PACKET_SIZE
 #define NASA_MAX_PACKET_SIZE 1500
+#endif
 
 // Address Classes
 namespace AddressClass {

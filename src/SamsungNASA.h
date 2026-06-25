@@ -11,6 +11,10 @@
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 
+#ifndef NASA_TASK_STACK_SIZE
+#define NASA_TASK_STACK_SIZE 2048
+#endif
+
 typedef void (*PacketHandler)(const NASAPacket& packet);
 
 class SamsungNASA {
